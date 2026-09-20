@@ -122,11 +122,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shopast/skills.git"
+    "url": "git+https://github.com/shopast/skilly-cli.git"
   },
-  "homepage": "https://github.com/shopast/skills#readme",
+  "homepage": "https://github.com/shopast/skilly-cli#readme",
   "bugs": {
-    "url": "https://github.com/shopast/skills/issues"
+    "url": "https://github.com/shopast/skilly-cli/issues"
   },
   "author": "",
   "license": "MIT",
