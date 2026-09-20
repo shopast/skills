@@ -1,0 +1,8 @@
+{
+  "crons": [
+    { "path": "/api/skilly-catalog-sync", "schedule": "0 3 * * *" }
+  ],
+  "functions": {
+    "api/skilly-catalog-sync.ts": { "maxDuration": 300 }
+  }
+}

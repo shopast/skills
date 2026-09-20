@@ -1,0 +1,39 @@
+name: Skilly CI
+
+on:
+  pull_request:
+    paths:
+      - 'apps/skilly/**'
+      - 'docs/SKILLY_CATALOG_SYNC.md'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/skilly.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/skilly/**'
+      - 'docs/SKILLY_CATALOG_SYNC.md'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/skilly.yml'
+
+concurrency:
+  group: skilly-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check:skilly
+      - run: pnpm test:skilly
+      - run: pnpm build:skilly

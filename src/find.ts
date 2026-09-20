@@ -13,8 +13,10 @@ const CYAN = '\x1b[36m';
 const MAGENTA = '\x1b[35m';
 const YELLOW = '\x1b[33m';
 
-// API endpoint for skills search
-const SEARCH_API_BASE = process.env.SKILLS_API_URL || 'https://skills.sh';
+// API endpoint for skills search. SKILLY_API_URL opts into the description-
+// aware v1 response served by the included Skilly directory. SKILLS_API_URL
+// remains the generic override for the legacy skills.sh response.
+const DEFAULT_SEARCH_API_BASE = 'https://skills.sh';
 const SEARCH_RESULT_LIMIT = '20';
 
 function formatInstalls(count: number): string {
@@ -26,9 +28,14 @@ function formatInstalls(count: number): string {
 
 export interface SearchSkill {
   name: string;
+  /** The directory name accepted by `skills add --skill`. */
+  skillName: string;
   slug: string;
   source: string;
   installs: number;
+  description?: string;
+  matchedIn?: string;
+  url?: string;
 }
 
 export interface FindOptions {
@@ -86,29 +93,51 @@ export function parseFindOptions(args: string[]): ParseFindOptionsResult {
 // Search via API
 export async function searchSkillsAPI(query: string, owner?: string): Promise<SearchSkill[]> {
   try {
+    const skillyApiBase = process.env.SKILLY_API_URL;
+    const searchApiBase = (
+      skillyApiBase ||
+      process.env.SKILLS_API_URL ||
+      DEFAULT_SEARCH_API_BASE
+    ).replace(/\/+$/, '');
     const params = new URLSearchParams({ q: query, limit: SEARCH_RESULT_LIMIT });
     if (owner) params.set('owner', owner);
-    const url = `${SEARCH_API_BASE}/api/search?${params.toString()}`;
+    const endpoint = skillyApiBase ? '/api/v1/skills/search' : '/api/search';
+    const url = `${searchApiBase}${endpoint}?${params.toString()}`;
     const res = await fetch(url);
 
     if (!res.ok) return [];
 
-    const data = (await res.json()) as {
-      skills: Array<{
-        id: string;
-        name: string;
-        installs: number;
-        source: string;
-      }>;
+    type ApiSearchSkill = {
+      id: string;
+      slug?: string;
+      name: string;
+      installs: number;
+      source: string;
+      description?: string;
+      matchedIn?: string;
+      url?: string;
     };
+    const data = (await res.json()) as {
+      skills?: ApiSearchSkill[];
+      data?: ApiSearchSkill[];
+    };
+    const skills = data.data ?? data.skills ?? [];
 
-    return data.skills
-      .map((skill) => ({
-        name: sanitizeMetadata(skill.name),
-        slug: sanitizeMetadata(skill.id),
-        source: sanitizeMetadata(skill.source || ''),
-        installs: skill.installs,
-      }))
+    return skills
+      .map((skill) => {
+        const id = sanitizeMetadata(skill.id);
+        const skillName = sanitizeMetadata(skill.slug || skill.name || id.split('/').at(-1) || id);
+        return {
+          name: sanitizeMetadata(skill.name),
+          skillName,
+          slug: id,
+          source: sanitizeMetadata(skill.source || ''),
+          installs: skill.installs,
+          ...(skill.description ? { description: sanitizeMetadata(skill.description) } : {}),
+          ...(skill.matchedIn ? { matchedIn: sanitizeMetadata(skill.matchedIn) } : {}),
+          ...(skill.url ? { url: sanitizeMetadata(skill.url) } : {}),
+        };
+      })
       .sort((a, b) => (b.installs || 0) - (a.installs || 0));
   } catch {
     return [];
@@ -361,9 +390,12 @@ ${DIM}  2) npx skills add <owner/repo@skill>${RESET}`;
       const pkg = skill.source || skill.slug;
       const installs = formatInstalls(skill.installs);
       console.log(
-        `${TEXT}${pkg}@${skill.name}${RESET}${installs ? ` ${CYAN}${installs}${RESET}` : ''}`
+        `${TEXT}${pkg}@${skill.skillName}${RESET}${installs ? ` ${CYAN}${installs}${RESET}` : ''}`
       );
-      console.log(`${DIM}└ https://skills.sh/${skill.slug}${RESET}`);
+      if (skill.description) {
+        console.log(`${DIM}${skill.description}${RESET}`);
+      }
+      console.log(`${DIM}└ ${skill.url || `https://skills.sh/${skill.slug}`}${RESET}`);
       console.log();
     }
     return;
@@ -395,7 +427,7 @@ ${DIM}  2) npx skills add <owner/repo@skill>${RESET}`;
 
   // Use source (owner/repo) and skill name for installation
   const pkg = selected.source || selected.slug;
-  const skillName = selected.name;
+  const skillName = selected.skillName;
 
   console.log();
   console.log(`${TEXT}Installing ${BOLD}${skillName}${RESET} from ${DIM}${pkg}${RESET}…`);
@@ -410,7 +442,7 @@ ${DIM}  2) npx skills add <owner/repo@skill>${RESET}`;
   const info = getOwnerRepoFromString(pkg);
   if (info && (await isRepoPublic(info.owner, info.repo))) {
     console.log(
-      `${DIM}View the skill at${RESET} ${TEXT}https://skills.sh/${selected.slug}${RESET}`
+      `${DIM}View the skill at${RESET} ${TEXT}${selected.url || `https://skills.sh/${selected.slug}`}${RESET}`
     );
   } else {
     console.log(`${DIM}Discover more skills at${RESET} ${TEXT}https://skills.sh${RESET}`);

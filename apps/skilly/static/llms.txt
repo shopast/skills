@@ -1,0 +1,30 @@
+# Skilly
+
+Skilly is a public directory of agent skills.
+
+## Search
+
+Use the public JSON endpoint to find skills:
+
+GET https://skilly.sh/api/v1/skills/search
+
+It accepts either `q` for broad full-text search or field-specific parameters:
+
+- `name` — skill name
+- `description` — YAML frontmatter description
+- `category` — catalog category
+- `source` — source repository
+- `instructions` — full SKILL.md instructions
+- `owner` — GitHub owner filter
+- `limit` — maximum 200 results
+
+Field-specific parameters can be combined. Example:
+
+https://skilly.sh/api/v1/skills/search?name=algorithmic&category=Design
+
+Search requires no authentication and returns JSON. Each result includes its name, description, category, source repository, install URL, and canonical URL.
+
+## Documentation
+
+- API reference: https://skilly.sh/docs/api
+- OpenAPI: https://skilly.sh/api/openapi.json

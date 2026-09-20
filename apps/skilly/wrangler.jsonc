@@ -1,0 +1,12 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "skilly",
+  "main": ".svelte-kit/cloudflare/_worker.js",
+  "compatibility_date": "2026-09-18",
+  "compatibility_flags": ["nodejs_compat"],
+  "r2_buckets": [
+    { "binding": "CATALOG_BUCKET", "bucket_name": "skilly-catalog" }
+  ],
+  "assets": { "directory": ".svelte-kit/cloudflare", "binding": "ASSETS" },
+  "observability": { "enabled": true, "head_sampling_rate": 1 }
+}

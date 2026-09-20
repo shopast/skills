@@ -74,4 +74,36 @@ describe('searchSkillsAPI', () => {
     expect(output).toContain('owner/repo@skill-1');
     expect(output).toContain('owner/repo@skill-11');
   });
+
+  it('reads description-aware results from Skilly', async () => {
+    vi.stubEnv('SKILLY_API_URL', 'https://skilly.example');
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        data: [
+          {
+            id: 'owner/repo/description-skill',
+            slug: 'description-skill',
+            name: 'Description Skill',
+            description: 'Finds skills by what their instructions describe.',
+            matchedIn: 'description',
+            installs: 42,
+            source: 'owner/repo',
+          },
+        ],
+      }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const results = await searchSkillsAPI('instructions');
+
+    const url = new URL(fetchMock.mock.calls[0]![0] as string);
+    expect(url.pathname).toBe('/api/v1/skills/search');
+    expect(results[0]).toMatchObject({
+      name: 'Description Skill',
+      skillName: 'description-skill',
+      description: 'Finds skills by what their instructions describe.',
+      matchedIn: 'description',
+    });
+  });
 });

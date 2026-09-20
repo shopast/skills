@@ -2,6 +2,10 @@
 
 The CLI for the open agent skills ecosystem.
 
+This is the public Shopast fork of [`vercel-labs/skills`](https://github.com/vercel-labs/skills),
+with the standalone Skilly description-search directory and CLI integration
+maintained in this repository.
+
 <!-- agent-list:start -->
 Supports **OpenCode**, **Claude Code**, **Codex**, **Cursor**, and [75 more](#supported-agents).
 <!-- agent-list:end -->
@@ -9,7 +13,7 @@ Supports **OpenCode**, **Claude Code**, **Codex**, **Cursor**, and [75 more](#su
 <p>
   <a href="https://vercel.com/labs#labs-products"><img alt="Vercel Labs Product" src="https://img.shields.io/badge/LABS-PRODUCT-0a0a0a.svg?style=for-the-badge&amp;logo=Vercel&amp;labelColor=000000" height="28"></a>
   <a href="https://www.npmjs.com/package/skills"><img alt="npm version: skills" src="https://img.shields.io/npm/v/skills.svg?style=for-the-badge&amp;labelColor=000000" height="28"></a>
-  <a href="https://github.com/vercel-labs/skills/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/github/license/vercel-labs/skills.svg?style=for-the-badge&amp;labelColor=000000" height="28"></a>
+  <a href="https://github.com/shopast/skills/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/github/license/shopast/skills.svg?style=for-the-badge&amp;labelColor=000000" height="28"></a>
   <a href="https://www.npmjs.com/package/skills"><img alt="npm downloads per month: skills" src="https://img.shields.io/npm/dm/skills.svg?style=for-the-badge&amp;labelColor=000000&amp;label=npm%20downloads" height="28"></a>
   <a href="https://skills.sh/vercel-labs/skills"><img alt="skills.sh" src="https://skills.sh/b/vercel-labs/skills?style=for-the-badge" height="28"></a>
 </p>
@@ -30,6 +34,28 @@ npx skills use vercel-labs/agent-skills --skill web-design-guidelines --agent cl
 ```
 
 `skills use` resolves sources the same way as `skills add`, writes the selected skill files to a temporary directory, and prints only the generated prompt to stdout unless `--agent` is provided. With `--agent`, it starts one supported agent interactively with the generated prompt.
+
+## Shopast description search
+
+This fork includes [Skilly](./apps/skilly), a standalone Cloudflare Worker
+directory that indexes `SKILL.md` frontmatter descriptions and ranks matches
+by what a skill does—not only by its name. Run it locally with:
+
+```bash
+pnpm install
+pnpm dev:skilly
+```
+
+To make `skills find` consume a deployed Skilly instance, set its base URL:
+
+```bash
+SKILLY_API_URL=https://your-skilly-worker.example npx skills find typography
+```
+
+The CLI keeps the upstream `skills.sh` search contract by default. When
+`SKILLY_API_URL` is set, it reads Skilly’s `/api/v1/skills/search` response,
+including descriptions and the matched field, while preserving the normal
+`npx skills add owner/repo --skill name` installation flow.
 
 ### Source Formats
 

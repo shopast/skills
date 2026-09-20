@@ -1,0 +1,28 @@
+[
+  {
+    "repo": "anthropics/skills",
+    "branch": "main",
+    "prefix": "skills/",
+    "category": "Productivity",
+    "categories": {
+      "frontend-design": "Design",
+      "canvas-design": "Design",
+      "brand-guidelines": "Design",
+      "theme-factory": "Design",
+      "algorithmic-art": "Design",
+      "slack-gif-creator": "Design",
+      "webapp-testing": "Development",
+      "mcp-builder": "Development",
+      "web-artifacts-builder": "Development",
+      "skill-creator": "Workflow"
+    }
+  },
+  {
+    "repo": "vercel-labs/agent-skills",
+    "branch": "main",
+    "prefix": "skills/",
+    "category": "Development",
+    "categories": { "web-design-guidelines": "Design" }
+  },
+  { "repo": "obra/superpowers", "branch": "main", "prefix": "skills/", "category": "Workflow" }
+]

@@ -5,6 +5,9 @@ node_modules
 out
 dist
 *.tgz
+apps/skilly/.svelte-kit/
+apps/skilly/.wrangler/
+apps/skilly/test-results/
 
 # code coverage
 coverage

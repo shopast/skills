@@ -14,6 +14,10 @@
     "ThirdPartyNoticeText.txt"
   ],
   "scripts": {
+    "dev:skilly": "pnpm --filter skilly dev",
+    "build:skilly": "pnpm --filter skilly build",
+    "check:skilly": "pnpm --filter skilly check",
+    "test:skilly": "pnpm --filter skilly test:run",
     "build": "node scripts/generate-licenses.ts && obuild",
     "generate-licenses": "node scripts/generate-licenses.ts",
     "dev": "node src/cli.ts",
@@ -118,11 +122,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vercel-labs/skills.git"
+    "url": "git+https://github.com/shopast/skills.git"
   },
-  "homepage": "https://github.com/vercel-labs/skills#readme",
+  "homepage": "https://github.com/shopast/skills#readme",
   "bugs": {
-    "url": "https://github.com/vercel-labs/skills/issues"
+    "url": "https://github.com/shopast/skills/issues"
   },
   "author": "",
   "license": "MIT",
