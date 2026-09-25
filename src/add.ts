@@ -6,7 +6,8 @@ import { sep, join, dirname } from 'path';
 import { parseSource, getOwnerRepo, parseOwnerRepo, isRepoPrivate } from './source-parser.ts';
 import { stripTerminalEscapes } from './sanitize.ts';
 import { searchMultiselect } from './prompts/search-multiselect.ts';
-import { cloneRepo, cleanupTempDir, GitCloneError } from './git.ts';
+import { cloneRepo, cleanupTempDir } from './git.ts';
+import type { GitCloneError } from './git.ts';
 import { discoverSkills, getSkillDisplayName, filterSkills } from './skills.ts';
 import {
   installSkillForAgent,
@@ -25,13 +26,7 @@ import {
   isUniversalAgent,
   getEveSubagents,
 } from './agents.ts';
-import {
-  track,
-  setVersion,
-  fetchAuditData,
-  type AuditResponse,
-  type PartnerAudit,
-} from './telemetry.ts';
+import { track, setVersion, fetchAuditData, type AuditResponse } from './telemetry.ts';
 import { detectAgent, getAgentType } from './detect-agent.ts';
 import {
   wellKnownProvider,
@@ -52,7 +47,6 @@ import { addSkillToLocalLock, computeSkillFolderHash } from './local-lock.ts';
 import type { Skill, AgentType } from './types.ts';
 import {
   tryBlobInstall,
-  BLOB_ALLOWED_REPOS,
   getSkillFolderHashFromTree,
   fetchRepoTree,
   type BlobSkill,
@@ -69,6 +63,12 @@ import {
 // Helper to check if a value is a cancel symbol (works with both clack and our custom prompts)
 const isCancelled = (value: unknown): value is symbol => typeof value === 'symbol';
 const EVE_AGENT_LABEL = 'eve agent';
+
+function isGitCloneError(error: unknown): error is GitCloneError {
+  // Use the stable error name so partial git module implementations can omit
+  // the optional class export without breaking error handling.
+  return error instanceof Error && error.name === 'GitCloneError';
+}
 
 /**
  * Check if a source identifier (owner/repo format) represents a private GitHub repo.
@@ -129,12 +129,6 @@ function riskLabel(risk: string): string {
   }
 }
 
-function socketLabel(audit: PartnerAudit | undefined): string {
-  if (!audit) return pc.dim('--');
-  const count = audit.alerts ?? 0;
-  return count > 0 ? pc.red(`${count} alert${count !== 1 ? 's' : ''}`) : pc.green('0 alerts');
-}
-
 /** Pad a string to a given visible width (ignoring ANSI escape codes). */
 function padEnd(str: string, width: number): string {
   // Strip ANSI codes to measure visible length
@@ -144,7 +138,7 @@ function padEnd(str: string, width: number): string {
 }
 
 /**
- * Render a compact security table showing partner audit results.
+ * Render a compact security table showing Skilly audit results.
  * Returns the lines to display, or empty array if no data.
  */
 function buildSecurityLines(
@@ -166,11 +160,7 @@ function buildSecurityLines(
 
   // Header
   const lines: string[] = [];
-  const header =
-    padEnd('', nameWidth + 2) +
-    padEnd(pc.dim('Gen'), 18) +
-    padEnd(pc.dim('Socket'), 18) +
-    pc.dim('Snyk');
+  const header = padEnd('', nameWidth + 2) + pc.dim('Skilly');
   lines.push(header);
 
   // Rows
@@ -181,16 +171,14 @@ function buildSecurityLines(
         ? skill.displayName.slice(0, nameWidth - 1) + '\u2026'
         : skill.displayName;
 
-    const ath = data?.ath ? riskLabel(data.ath.risk) : pc.dim('--');
-    const socket = data?.socket ? socketLabel(data.socket) : pc.dim('--');
-    const snyk = data?.snyk ? riskLabel(data.snyk.risk) : pc.dim('--');
+    const skilly = data?.skilly ? riskLabel(data.skilly.risk) : pc.dim('--');
 
-    lines.push(padEnd(pc.cyan(name), nameWidth + 2) + padEnd(ath, 18) + padEnd(socket, 18) + snyk);
+    lines.push(padEnd(pc.cyan(name), nameWidth + 2) + skilly);
   }
 
   // Footer link
   lines.push('');
-  lines.push(`${pc.dim('Details:')} ${pc.dim(`https://skills.sh/${source}`)}`);
+  lines.push(`${pc.dim('Details:')} ${pc.dim(`https://skilly.sh/${source}`)}`);
 
   return lines;
 }
@@ -592,16 +580,14 @@ interface AddJsonResult {
   agents?: string[];
   mode?: InstallMode;
   security?: {
-    gen?: string;
-    socket?: string;
-    snyk?: string;
+    skilly?: string;
     details?: string;
   } | null;
   reason?: string;
   error?: string;
 }
 
-/** Build the `security` field for a JSON entry from partner audit data. */
+/** Build the `security` field for a JSON entry from Skilly audit data. */
 function buildJsonSecurity(
   auditData: AuditResponse | null,
   skillName: string,
@@ -609,12 +595,9 @@ function buildJsonSecurity(
 ): AddJsonResult['security'] {
   const data = auditData?.[skillName];
   if (!data || Object.keys(data).length === 0) return null;
-  const socketAlerts = data.socket?.alerts ?? 0;
   return {
-    ...(data.ath && { gen: data.ath.risk }),
-    ...(data.socket && { socket: `${socketAlerts} alert${socketAlerts !== 1 ? 's' : ''}` }),
-    ...(data.snyk && { snyk: data.snyk.risk }),
-    ...(source && { details: `https://skills.sh/${source}` }),
+    ...(data.skilly && { skilly: data.skilly.risk }),
+    ...(source && { details: `https://skilly.sh/${source}` }),
   };
 }
 
@@ -623,11 +606,11 @@ function buildJsonSecurity(
  * Discovers skills from /.well-known/agent-skills/index.json (preferred)
  * or /.well-known/skills/index.json (legacy fallback).
  */
-function isSkillsShPackUrl(url: string): boolean {
+function isSkillyPackUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
     const hostname = parsed.hostname.replace(/^www\./, '');
-    return hostname === 'skills.sh' && /^\/p\/[^/]+/.test(parsed.pathname);
+    return hostname === 'skilly.sh' && /^\/p\/[^/]+/.test(parsed.pathname);
   } catch {
     return false;
   }
@@ -740,7 +723,7 @@ async function handleWellKnownSkills(
     const selected = await searchMultiselect({
       message: 'Select skills to install',
       items: skillChoices,
-      initialSelected: isSkillsShPackUrl(url) ? skills : undefined,
+      initialSelected: isSkillyPackUrl(url) ? skills : undefined,
       required: true,
       maxVisible: 20,
       selectAll: true,
@@ -1190,10 +1173,12 @@ export async function runAdd(args: string[], options: AddOptions = {}): Promise<
     );
     console.log();
     console.log(pc.dim('  Usage:'));
-    console.log(`    ${pc.cyan('npx skills add')} ${pc.yellow('<source>')} ${pc.dim('[options]')}`);
+    console.log(
+      `    ${pc.cyan('npx skillycli add')} ${pc.yellow('<source>')} ${pc.dim('[options]')}`
+    );
     console.log();
     console.log(pc.dim('  Example:'));
-    console.log(`    ${pc.cyan('npx skills add')} ${pc.yellow('vercel-labs/agent-skills')}`);
+    console.log(`    ${pc.cyan('npx skillycli add')} ${pc.yellow('vercel-labs/agent-skills')}`);
     console.log();
     emitJsonAndExit(1, 'Missing required argument: source');
   }
@@ -1368,15 +1353,20 @@ export async function runAdd(args: string[], options: AddOptions = {}): Promise<
       });
     } else if (parsed.type === 'github' && !options.fullDepth) {
       // Try the blob-based fast install for GitHub sources; skip for --full-depth.
-      // Eligible per repo (a BLOB_ALLOWED_REPOS entry = self-hosted download URL) or
-      // per owner (BLOB_ALLOWED_OWNERS = all their repos, skills.sh-hosted).
+      // The Skilly API is the fast path for the large catalogued GitHub
+      // publishers. Any uncatalogued or incomplete result falls back to the
+      // source repository.
       let attemptedBlobInstall = false;
-      const BLOB_ALLOWED_OWNERS = ['vercel', 'vercel-labs', 'heygen-com', 'remotion-dev'];
+      const SKILLY_API_OWNERS = [
+        'vercel',
+        'vercel-labs',
+        'heygen-com',
+        'remotion-dev',
+        'mattpocock',
+      ];
       const ownerRepo = getOwnerRepo(parsed);
       const owner = ownerRepo?.split('/')[0]?.toLowerCase();
-      const isSelfHostedRepo =
-        !!ownerRepo && Object.hasOwn(BLOB_ALLOWED_REPOS, ownerRepo.toLowerCase());
-      if (ownerRepo && owner && (isSelfHostedRepo || BLOB_ALLOWED_OWNERS.includes(owner))) {
+      if (ownerRepo && owner && SKILLY_API_OWNERS.includes(owner)) {
         attemptedBlobInstall = true;
         spinner.start('Fetching skills…');
         blobResult = await tryBlobInstall(ownerRepo, {
@@ -2314,7 +2304,7 @@ export async function runAdd(args: string[], options: AddOptions = {}): Promise<
     // Prompt for find-skills after successful install
     await promptForFindSkills(options, targetAgents);
   } catch (error) {
-    if (error instanceof GitCloneError) {
+    if (isGitCloneError(error)) {
       p.log.error(pc.red('Failed to clone repository'));
       // Print each line of the error message separately for better formatting
       for (const line of error.message.split('\n')) {
@@ -2325,12 +2315,11 @@ export async function runAdd(args: string[], options: AddOptions = {}): Promise<
     }
     showInstallTip();
     p.outro(pc.red('Installation failed'));
-    const errorMessage =
-      error instanceof GitCloneError
-        ? `Failed to clone repository\n${error.message}`
-        : error instanceof Error
-          ? error.message
-          : 'Unknown error occurred';
+    const errorMessage = isGitCloneError(error)
+      ? `Failed to clone repository\n${error.message}`
+      : error instanceof Error
+        ? error.message
+        : 'Unknown error occurred';
     emitJsonAndExit(1, errorMessage);
   } finally {
     if (jsonMode) process.removeListener('exit', emitJsonOnExit);
@@ -2403,7 +2392,7 @@ async function promptForFindSkills(
 
       try {
         // Call runAdd directly
-        await runAdd(['vercel-labs/skills'], {
+        await runAdd(['shopast/find-skills'], {
           skill: ['find-skills'],
           global: true,
           yes: true,
@@ -2411,13 +2400,15 @@ async function promptForFindSkills(
         });
       } catch {
         p.log.warn('Failed to install find-skills. You can try again with:');
-        p.log.message(pc.dim('  npx skills add vercel-labs/skills@find-skills -g -y --all'));
+        p.log.message(pc.dim('  npx skillycli add shopast/find-skills --skill find-skills -g -y'));
       }
     } else {
       // User declined - dismiss the prompt
       await dismissPrompt('findSkillsPrompt');
       p.log.message(
-        pc.dim('You can install it later with: npx skills add vercel-labs/skills@find-skills')
+        pc.dim(
+          'You can install it later with: npx skillycli add shopast/find-skills --skill find-skills'
+        )
       );
     }
   } catch {

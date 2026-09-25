@@ -34,38 +34,39 @@ async function getText(fetchImpl, url, label, sleep) {
   throw new Error(`Unreachable: ${label}`)
 }
 
-async function loadSkillsShCatalog(fetchImpl, headers, sleep) {
+async function loadSkillyCatalog(fetchImpl, headers, sleep, apiBaseUrl) {
   const all = []
   let page = 0
   let expectedTotal = null
   while (true) {
     const payload = await getJson(
       fetchImpl,
-      `https://skills.sh/api/v1/skills?view=all-time&page=${page}&per_page=500`,
+      `${apiBaseUrl}/api/v1/skills?view=all-time&page=${page}&per_page=500`,
       headers,
-      `skills.sh page ${page}`,
+      `Skilly page ${page}`,
       sleep
     )
     if (!Array.isArray(payload.data) || !payload.pagination)
-      throw new Error(`skills.sh page ${page}: invalid response shape`)
+      throw new Error(`Skilly page ${page}: invalid response shape`)
     expectedTotal ??= payload.pagination.total
     if (payload.pagination.total !== expectedTotal)
-      throw new Error('skills.sh catalog changed while paging; retry the refresh')
+      throw new Error('Skilly catalog changed while paging; retry the refresh')
     all.push(...payload.data)
     if (!payload.pagination.hasMore) break
     if (payload.data.length === 0)
-      throw new Error(`skills.sh page ${page}: empty page with hasMore=true`)
+      throw new Error(`Skilly page ${page}: empty page with hasMore=true`)
     page += 1
   }
   if (expectedTotal === null || all.length !== expectedTotal)
-    throw new Error(`skills.sh returned ${all.length} skills; expected ${expectedTotal}`)
+    throw new Error(`Skilly returned ${all.length} skills; expected ${expectedTotal}`)
   if (new Set(all.map((skill) => skill.id)).size !== all.length)
-    throw new Error('skills.sh returned duplicate skill IDs')
+    throw new Error('Skilly returned duplicate skill IDs')
   return all
 }
 
-export async function buildCatalog({ apiToken, githubToken, previous, fetchImpl = fetch, sleep = sleepDefault }) {
-  if (!apiToken) throw new Error('Missing SKILLS_SH_API_TOKEN (skills.sh API authentication is required).')
+export async function buildCatalog({ apiToken, githubToken, apiBaseUrl = process.env.SKILLY_API_URL || 'https://skilly.sh', previous, fetchImpl = fetch, sleep = sleepDefault }) {
+  if (!apiToken) throw new Error('Missing SKILLY_API_TOKEN (Skilly API authentication is required).')
+  apiBaseUrl = apiBaseUrl.replace(/\/+$/, '')
   const skillsHeaders = { Accept: 'application/json', Authorization: `Bearer ${apiToken}` }
   const githubHeaders = {
     Accept: 'application/vnd.github+json',
@@ -73,7 +74,7 @@ export async function buildCatalog({ apiToken, githubToken, previous, fetchImpl 
   }
   if (githubToken) githubHeaders.Authorization = `Bearer ${githubToken}`
 
-  const upstreamSkills = await loadSkillsShCatalog(fetchImpl, skillsHeaders, sleep)
+  const upstreamSkills = await loadSkillyCatalog(fetchImpl, skillsHeaders, sleep, apiBaseUrl)
   const unsupported = upstreamSkills.filter(
     (skill) => skill.sourceType && skill.sourceType !== 'github'
   )
@@ -165,12 +166,12 @@ export async function buildCatalog({ apiToken, githubToken, previous, fetchImpl 
         ...metadata,
         id: old?.id ?? metadata.id,
         category: old?.category ?? metadata.category,
-        skillsShId: upstream.id,
+        skillyId: upstream.id,
         apiName: upstream.name,
         sourceType: upstream.sourceType ?? 'github',
         ...(upstream.isDuplicate ? { isDuplicate: true } : {}),
         installs: Number.isSafeInteger(upstream.installs) ? upstream.installs : 0,
-        skillsShUrl: `https://skills.sh/${upstream.id}`,
+        skillyUrl: upstream.url ?? `${apiBaseUrl}/skills/${upstream.id}`,
         installUrl: upstream.installUrl ?? `https://github.com/${repo}`,
         contentHash: [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(content)))]
           .map((byte) => byte.toString(16).padStart(2, '0')).join(''),
@@ -190,7 +191,7 @@ export async function buildCatalog({ apiToken, githubToken, previous, fetchImpl 
 if (process.argv[1] && new URL(`file://${process.argv[1]}`).href === import.meta.url) {
   const previous = JSON.parse(await readFile(destination, 'utf8'))
   const catalog = await buildCatalog({
-    apiToken: process.env.SKILLS_SH_API_TOKEN || process.env.VERCEL_OIDC_TOKEN,
+    apiToken: process.env.SKILLY_API_TOKEN,
     githubToken: process.env.GITHUB_TOKEN,
     previous,
   })

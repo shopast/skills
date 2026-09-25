@@ -77,9 +77,9 @@ interface UseAgentConfig {
   args: string[];
 }
 
-const BLOB_ALLOWED_OWNERS = ['vercel', 'vercel-labs', 'heygen-com', 'remotion-dev'];
 const EXCLUDE_FILES = new Set(['metadata.json']);
 const EXCLUDE_DIRS = new Set(['.git', '__pycache__', '__pypackages__']);
+const SKILLY_API_OWNERS = ['vercel', 'vercel-labs', 'heygen-com', 'remotion-dev', 'mattpocock'];
 const USE_AGENT_CONFIGS: Partial<Record<AgentType, UseAgentConfig>> = {
   'claude-code': { command: 'claude', args: [] },
   codex: { command: 'codex', args: [] },
@@ -268,7 +268,7 @@ export async function runUse(
       } else if (parsed.type === 'github' && !options.fullDepth) {
         const ownerRepo = getOwnerRepo(parsed);
         const owner = ownerRepo?.split('/')[0]?.toLowerCase();
-        if (ownerRepo && owner && BLOB_ALLOWED_OWNERS.includes(owner)) {
+        if (ownerRepo && owner && SKILLY_API_OWNERS.includes(owner)) {
           blobResult = await tryBlobInstall(ownerRepo, {
             subpath: parsed.subpath,
             skillFilter: selector,
@@ -389,20 +389,20 @@ function spawnAgent(command: string, args: string[]): AgentProcess {
 }
 
 function getUseHelp(): string {
-  return `Usage: skills use <source>[@<skill>] [options]
+  return `Usage: skillycli use <source>[@<skill>] [options]
 
 Generate a prompt for using one skill without installing it.
 
 Options:
   -s, --skill <skill>   Select the skill to use
   -a, --agent <agent>   Start one supported agent interactively (${SUPPORTED_USE_AGENTS.join(', ')})
-  --full-depth          Search nested directories like skills add --full-depth
+  --full-depth          Search nested directories like skillycli add --full-depth
   -h, --help            Show this help message
 
 Examples:
-  skills use vercel-labs/agent-skills@web-design-guidelines | claude
-  skills use vercel-labs/agent-skills --skill web-design-guidelines --agent claude-code
-  skills use vercel-labs/agent-skills@web-design-guidelines --agent codex`;
+  skillycli use vercel-labs/agent-skills@web-design-guidelines | claude
+  skillycli use vercel-labs/agent-skills --skill web-design-guidelines --agent claude-code
+  skillycli use vercel-labs/agent-skills@web-design-guidelines --agent codex`;
 }
 
 function resolveSelector(sourceSelector?: string, optionSelector?: string): string | undefined {
@@ -497,7 +497,7 @@ function formatMultipleSkillsError(source: string, names: string[]): string {
     'This source contains multiple skills. Specify exactly one skill:',
     ...names.map((name) => `  - ${name}`),
     '',
-    `Examples:\n  skills use ${source}@${names[0] ?? '<skill>'}\n  skills use ${source} --skill ${names[0] ?? '<skill>'}`,
+    `Examples:\n  skillycli use ${source}@${names[0] ?? '<skill>'}\n  skillycli use ${source} --skill ${names[0] ?? '<skill>'}`,
   ].join('\n');
 }
 
@@ -519,10 +519,10 @@ function validateUseAgentOption(agentValues: string[] | undefined): string[] {
   );
 
   if (agentValues.includes('*')) {
-    errors.push("skills use --agent does not support '*'; specify exactly one agent.");
+    errors.push("skillycli use --agent does not support '*'; specify exactly one agent.");
   }
   if (agentValues.length > 1) {
-    errors.push('skills use --agent accepts exactly one agent.');
+    errors.push('skillycli use --agent accepts exactly one agent.');
   }
   if (invalidAgents.length > 0) {
     errors.push(
@@ -536,7 +536,7 @@ function validateUseAgentOption(agentValues: string[] | undefined): string[] {
 function formatUnsupportedAgentError(agent: AgentType): string {
   return [
     `Running ${agents[agent].displayName} is not supported yet.`,
-    `Supported agents for skills use --agent: ${SUPPORTED_USE_AGENTS.join(', ')}`,
+    `Supported agents for skillycli use --agent: ${SUPPORTED_USE_AGENTS.join(', ')}`,
   ].join('\n');
 }
 

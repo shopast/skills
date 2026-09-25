@@ -64,47 +64,47 @@ function showLogo(): void {
 function showBanner(): void {
   showLogo();
   console.log();
-  console.log(`${DIM}The open agent skills ecosystem${RESET}`);
+  console.log(`${DIM}The Skilly agent-skill catalog${RESET}`);
   console.log();
   console.log(
-    `  ${DIM}$${RESET} ${TEXT}npx skills add ${DIM}<package>${RESET}        ${DIM}Add a new skill${RESET}`
+    `  ${DIM}$${RESET} ${TEXT}npx skillycli add ${DIM}<package>${RESET}        ${DIM}Add a new skill${RESET}`
   );
   console.log(
-    `  ${DIM}$${RESET} ${TEXT}npx skills use ${DIM}<package>@<skill>${RESET} ${DIM}Use a skill without installing${RESET}`
+    `  ${DIM}$${RESET} ${TEXT}npx skillycli use ${DIM}<package>@<skill>${RESET} ${DIM}Use a skill without installing${RESET}`
   );
   console.log(
-    `  ${DIM}$${RESET} ${TEXT}npx skills remove${RESET}               ${DIM}Remove installed skills${RESET}`
+    `  ${DIM}$${RESET} ${TEXT}npx skillycli remove${RESET}               ${DIM}Remove installed skills${RESET}`
   );
   console.log(
-    `  ${DIM}$${RESET} ${TEXT}npx skills list${RESET}                 ${DIM}List installed skills${RESET}`
+    `  ${DIM}$${RESET} ${TEXT}npx skillycli list${RESET}                 ${DIM}List installed skills${RESET}`
   );
   console.log(
-    `  ${DIM}$${RESET} ${TEXT}npx skills find ${DIM}[query]${RESET}         ${DIM}Search for skills${RESET}`
-  );
-  console.log();
-  console.log(
-    `  ${DIM}$${RESET} ${TEXT}npx skills update${RESET}               ${DIM}Update installed skills${RESET}`
+    `  ${DIM}$${RESET} ${TEXT}npx skillycli find ${DIM}[query]${RESET}         ${DIM}Search for skills${RESET}`
   );
   console.log();
   console.log(
-    `  ${DIM}$${RESET} ${TEXT}npx skills experimental_install${RESET} ${DIM}Restore from skills-lock.json${RESET}`
-  );
-  console.log(
-    `  ${DIM}$${RESET} ${TEXT}npx skills init ${DIM}[name]${RESET}          ${DIM}Create a new skill${RESET}`
-  );
-  console.log(
-    `  ${DIM}$${RESET} ${TEXT}npx skills experimental_sync${RESET}    ${DIM}Sync skills from node_modules${RESET}`
+    `  ${DIM}$${RESET} ${TEXT}npx skillycli update${RESET}               ${DIM}Update installed skills${RESET}`
   );
   console.log();
-  console.log(`${DIM}try:${RESET} npx skills add vercel-labs/agent-skills`);
+  console.log(
+    `  ${DIM}$${RESET} ${TEXT}npx skillycli experimental_install${RESET} ${DIM}Restore from skills-lock.json${RESET}`
+  );
+  console.log(
+    `  ${DIM}$${RESET} ${TEXT}npx skillycli init ${DIM}[name]${RESET}          ${DIM}Create a new skill${RESET}`
+  );
+  console.log(
+    `  ${DIM}$${RESET} ${TEXT}npx skillycli experimental_sync${RESET}    ${DIM}Sync skills from node_modules${RESET}`
+  );
   console.log();
-  console.log(`Discover more skills at ${TEXT}https://skills.sh/${RESET}`);
+  console.log(`${DIM}try:${RESET} npx skillycli add vercel-labs/agent-skills`);
+  console.log();
+  console.log(`Discover more skills at ${TEXT}https://skilly.sh/${RESET}`);
   console.log();
 }
 
 function showHelp(): void {
   console.log(`
-${BOLD}Usage:${RESET} skills <command> [options]
+${BOLD}Usage:${RESET} skillycli <command> [options]
 
 ${BOLD}Manage Skills:${RESET}
   add <package>        Add a skill package (alias: a)
@@ -137,7 +137,7 @@ ${BOLD}Project:${RESET}
 ${BOLD}Add Options:${RESET}
   -g, --global           Install skill globally (user-level) instead of project-level
   -a, --agent <agents>   Specify agents to install to (use '*' for all agents)
-  -s, --skill <skills>   Specify skill names to install (use '*' for all skills)
+  -s, --skill <skills>   Specify skill names to install; repeat for multiple (use '*' for all skills)
   -l, --list             List available skills in the repository without installing
   -y, --yes              Skip confirmation prompts
   --copy                 Copy files instead of symlinking to agent directories
@@ -173,38 +173,38 @@ ${BOLD}Options:${RESET}
   --version, -v     Show version number
 
 ${BOLD}Examples:${RESET}
-  ${DIM}$${RESET} skills add vercel-labs/agent-skills
-  ${DIM}$${RESET} skills use vercel-labs/agent-skills@vercel-optimize | claude
-  ${DIM}$${RESET} skills use vercel-labs/agent-skills --skill vercel-optimize --agent claude-code
-  ${DIM}$${RESET} skills add vercel-labs/agent-skills -g
-  ${DIM}$${RESET} skills add vercel-labs/agent-skills --agent claude-code cursor
-  ${DIM}$${RESET} skills add vercel-labs/agent-skills --skill pr-review commit
-  ${DIM}$${RESET} skills add vercel-labs/agent-skills --json -y ${DIM}# JSON output${RESET}
-  ${DIM}$${RESET} skills remove                        ${DIM}# interactive remove${RESET}
-  ${DIM}$${RESET} skills remove web-design             ${DIM}# remove by name${RESET}
-  ${DIM}$${RESET} skills rm --global frontend-design
-  ${DIM}$${RESET} skills list                          ${DIM}# list project skills${RESET}
-  ${DIM}$${RESET} skills ls -g                         ${DIM}# list global skills${RESET}
-  ${DIM}$${RESET} skills ls -a claude-code             ${DIM}# filter by agent${RESET}
-  ${DIM}$${RESET} skills ls --json                      ${DIM}# JSON output${RESET}
-  ${DIM}$${RESET} skills find                          ${DIM}# interactive search${RESET}
-  ${DIM}$${RESET} skills find typescript               ${DIM}# search by keyword${RESET}
-  ${DIM}$${RESET} skills find react --owner vercel     ${DIM}# search within an owner${RESET}
-  ${DIM}$${RESET} skills update
-  ${DIM}$${RESET} skills update my-skill             ${DIM}# update a single skill${RESET}
-  ${DIM}$${RESET} skills update -g                    ${DIM}# update global skills only${RESET}
-  ${DIM}$${RESET} skills experimental_install            ${DIM}# restore from skills-lock.json${RESET}
-  ${DIM}$${RESET} skills init my-skill
-  ${DIM}$${RESET} skills experimental_sync              ${DIM}# sync from node_modules${RESET}
-  ${DIM}$${RESET} skills experimental_sync -y           ${DIM}# sync without prompts${RESET}
+  ${DIM}$${RESET} skillycli add vercel-labs/agent-skills
+  ${DIM}$${RESET} skillycli use vercel-labs/agent-skills@vercel-optimize | claude
+  ${DIM}$${RESET} skillycli use vercel-labs/agent-skills --skill vercel-optimize --agent claude-code
+  ${DIM}$${RESET} skillycli add vercel-labs/agent-skills -g
+  ${DIM}$${RESET} skillycli add vercel-labs/agent-skills --agent claude-code cursor
+  ${DIM}$${RESET} skillycli add vercel-labs/agent-skills --skill pr-review commit
+  ${DIM}$${RESET} skillycli add vercel-labs/agent-skills --json -y ${DIM}# JSON output${RESET}
+  ${DIM}$${RESET} skillycli remove                        ${DIM}# interactive remove${RESET}
+  ${DIM}$${RESET} skillycli remove web-design             ${DIM}# remove by name${RESET}
+  ${DIM}$${RESET} skillycli rm --global frontend-design
+  ${DIM}$${RESET} skillycli list                          ${DIM}# list project skills${RESET}
+  ${DIM}$${RESET} skillycli ls -g                         ${DIM}# list global skills${RESET}
+  ${DIM}$${RESET} skillycli ls -a claude-code             ${DIM}# filter by agent${RESET}
+  ${DIM}$${RESET} skillycli ls --json                      ${DIM}# JSON output${RESET}
+  ${DIM}$${RESET} skillycli find                          ${DIM}# interactive search${RESET}
+  ${DIM}$${RESET} skillycli find typescript               ${DIM}# search by keyword${RESET}
+  ${DIM}$${RESET} skillycli find react --owner vercel     ${DIM}# search within an owner${RESET}
+  ${DIM}$${RESET} skillycli update
+  ${DIM}$${RESET} skillycli update my-skill             ${DIM}# update a single skill${RESET}
+  ${DIM}$${RESET} skillycli update -g                    ${DIM}# update global skills only${RESET}
+  ${DIM}$${RESET} skillycli experimental_install            ${DIM}# restore from skills-lock.json${RESET}
+  ${DIM}$${RESET} skillycli init my-skill
+  ${DIM}$${RESET} skillycli experimental_sync              ${DIM}# sync from node_modules${RESET}
+  ${DIM}$${RESET} skillycli experimental_sync -y           ${DIM}# sync without prompts${RESET}
 
-Discover more skills at ${TEXT}https://skills.sh/${RESET}
+Discover more skills at ${TEXT}https://skilly.sh/${RESET}
 `);
 }
 
 function showRemoveHelp(): void {
   console.log(`
-${BOLD}Usage:${RESET} skills remove [skills...] [options]
+${BOLD}Usage:${RESET} skillycli remove [skills...] [options]
 
 ${BOLD}Description:${RESET}
   Remove installed skills from agents. If no skill names are provided,
@@ -221,15 +221,15 @@ ${BOLD}Options:${RESET}
   --all              Remove every installed skill (-y implied). Do not combine with named skills.
 
 ${BOLD}Examples:${RESET}
-  ${DIM}$${RESET} skills remove                           ${DIM}# interactive selection${RESET}
-  ${DIM}$${RESET} skills remove my-skill                   ${DIM}# remove specific skill${RESET}
-  ${DIM}$${RESET} skills remove skill1 skill2 -y           ${DIM}# remove multiple skills${RESET}
-  ${DIM}$${RESET} skills remove --global my-skill          ${DIM}# remove from global scope${RESET}
-  ${DIM}$${RESET} skills rm --agent claude-code my-skill   ${DIM}# remove from specific agent${RESET}
-  ${DIM}$${RESET} skills remove --all                      ${DIM}# remove all skills${RESET}
-  ${DIM}$${RESET} skills remove --skill '*' -a cursor      ${DIM}# remove all skills from cursor${RESET}
+  ${DIM}$${RESET} skillycli remove                           ${DIM}# interactive selection${RESET}
+  ${DIM}$${RESET} skillycli remove my-skill                   ${DIM}# remove specific skill${RESET}
+  ${DIM}$${RESET} skillycli remove skill1 skill2 -y           ${DIM}# remove multiple skills${RESET}
+  ${DIM}$${RESET} skillycli remove --global my-skill          ${DIM}# remove from global scope${RESET}
+  ${DIM}$${RESET} skillycli rm --agent claude-code my-skill   ${DIM}# remove from specific agent${RESET}
+  ${DIM}$${RESET} skillycli remove --all                      ${DIM}# remove all skills${RESET}
+  ${DIM}$${RESET} skillycli remove --skill '*' -a cursor      ${DIM}# remove all skills from cursor${RESET}
 
-Discover more skills at ${TEXT}https://skills.sh/${RESET}
+Discover more skills at ${TEXT}https://skilly.sh/${RESET}
 `);
 }
 
@@ -286,13 +286,13 @@ Describe when this skill should be used.
   console.log();
   console.log(`${DIM}Publishing:${RESET}`);
   console.log(
-    `  ${DIM}GitHub:${RESET}  Push to a repo, then ${TEXT}npx skills add <owner>/<repo>${RESET}`
+    `  ${DIM}GitHub:${RESET}  Push to a repo, then ${TEXT}npx skillycli add <owner>/<repo>${RESET}`
   );
   console.log(
-    `  ${DIM}URL:${RESET}     Host the file, then ${TEXT}npx skills add https://example.com/${displayPath}${RESET}`
+    `  ${DIM}URL:${RESET}     Host the file, then ${TEXT}npx skillycli add https://example.com/${displayPath}${RESET}`
   );
   console.log();
-  console.log(`Browse existing skills for inspiration at ${TEXT}https://skills.sh/${RESET}`);
+  console.log(`Browse existing skills for inspiration at ${TEXT}https://skilly.sh/${RESET}`);
   console.log();
 }
 
@@ -315,7 +315,7 @@ async function main(): Promise<void> {
   const restArgs = args.slice(1);
 
   // Subcommand --help / -h must short-circuit before dispatch so that running
-  // e.g. `skills update --help` prints help instead of executing the update
+  // e.g. `skillycli update --help` prints help instead of executing the update
   // flow. Without this pre-check, every subcommand handler that doesn't
   // inspect `--help` itself ends up running its side-effecting work.
   if (
@@ -411,7 +411,7 @@ async function main(): Promise<void> {
 
     default:
       console.log(`Unknown command: ${command}`);
-      console.log(`Run ${BOLD}skills --help${RESET} for usage.`);
+      console.log(`Run ${BOLD}skillycli --help${RESET} for usage.`);
       process.exitCode = 1;
   }
 }

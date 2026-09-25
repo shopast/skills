@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="150" height="28" viewBox="0 0 150 28" role="img" aria-labelledby="title">
+  <title id="title">Skilly agent skill directory</title>
+  <rect width="150" height="28" rx="4" fill="#151713"/>
+  <rect x="1" y="1" width="26" height="26" rx="4" fill="#d4fa73"/>
+  <path d="m16 4-9 12h7l-1 8 9-13h-7z" fill="#151713"/>
+  <text x="35" y="18.5" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700" letter-spacing=".7">SKILLY DIRECTORY</text>
+</svg>

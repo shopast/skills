@@ -13,10 +13,9 @@ const CYAN = '\x1b[36m';
 const MAGENTA = '\x1b[35m';
 const YELLOW = '\x1b[33m';
 
-// API endpoint for skills search. SKILLY_API_URL opts into the description-
-// aware v1 response served by the included Skilly directory. SKILLS_API_URL
-// remains the generic override for the legacy skills.sh response.
-const DEFAULT_SEARCH_API_BASE = 'https://skills.sh';
+// Search is served by the Skilly directory. SKILLY_API_URL is useful for a
+// local or self-hosted Skilly deployment.
+const DEFAULT_SEARCH_API_BASE = 'https://skilly.sh';
 const SEARCH_RESULT_LIMIT = '20';
 
 function formatInstalls(count: number): string {
@@ -28,7 +27,7 @@ function formatInstalls(count: number): string {
 
 export interface SearchSkill {
   name: string;
-  /** The directory name accepted by `skills add --skill`. */
+  /** The directory name accepted by `skillycli add --skill`. */
   skillName: string;
   slug: string;
   source: string;
@@ -93,16 +92,13 @@ export function parseFindOptions(args: string[]): ParseFindOptionsResult {
 // Search via API
 export async function searchSkillsAPI(query: string, owner?: string): Promise<SearchSkill[]> {
   try {
-    const skillyApiBase = process.env.SKILLY_API_URL;
-    const searchApiBase = (
-      skillyApiBase ||
-      process.env.SKILLS_API_URL ||
-      DEFAULT_SEARCH_API_BASE
-    ).replace(/\/+$/, '');
+    const searchApiBase = (process.env.SKILLY_API_URL || DEFAULT_SEARCH_API_BASE).replace(
+      /\/+$/,
+      ''
+    );
     const params = new URLSearchParams({ q: query, limit: SEARCH_RESULT_LIMIT });
     if (owner) params.set('owner', owner);
-    const endpoint = skillyApiBase ? '/api/v1/skills/search' : '/api/search';
-    const url = `${searchApiBase}${endpoint}?${params.toString()}`;
+    const url = `${searchApiBase}/api/v1/skills/search?${params.toString()}`;
     const res = await fetch(url);
 
     if (!res.ok) return [];
@@ -357,12 +353,12 @@ export async function runFind(args: string[]): Promise<void> {
   const owner = findOptions.owner;
   const isNonInteractive = !process.stdin.isTTY;
   const agentTip = `${DIM}Tip: if running in a coding agent, follow these steps:${RESET}
-${DIM}  1) npx skills find [query] [--owner <owner>]${RESET}
-${DIM}  2) npx skills add <owner/repo@skill>${RESET}`;
+${DIM}  1) npx skillycli find [query] [--owner <owner>]${RESET}
+${DIM}  2) npx skillycli add <owner/repo@skill>${RESET}`;
 
   if (errors.length > 0) {
     for (const error of errors) console.error(error);
-    console.error('Usage: npx skills find <query> [--owner <owner>]');
+    console.error('Usage: npx skillycli find <query> [--owner <owner>]');
     return;
   }
 
@@ -383,7 +379,7 @@ ${DIM}  2) npx skills add <owner/repo@skill>${RESET}`;
       return;
     }
 
-    console.log(`${DIM}Install with${RESET} npx skills add <owner/repo@skill>`);
+    console.log(`${DIM}Install with${RESET} npx skillycli add <owner/repo@skill>`);
     console.log();
 
     for (const skill of results) {
@@ -395,7 +391,7 @@ ${DIM}  2) npx skills add <owner/repo@skill>${RESET}`;
       if (skill.description) {
         console.log(`${DIM}${skill.description}${RESET}`);
       }
-      console.log(`${DIM}└ ${skill.url || `https://skills.sh/${skill.slug}`}${RESET}`);
+      console.log(`${DIM}└ ${skill.url || 'https://skilly.sh'}${RESET}`);
       console.log();
     }
     return;
@@ -405,7 +401,7 @@ ${DIM}  2) npx skills add <owner/repo@skill>${RESET}`;
   if (isNonInteractive || (await isRunningInAgent())) {
     console.log(agentTip);
     console.log();
-    console.log(`${DIM}Usage: npx skills find <query> [--owner <owner>]${RESET}`);
+    console.log(`${DIM}Usage: npx skillycli find <query> [--owner <owner>]${RESET}`);
     return;
   }
 
@@ -442,10 +438,10 @@ ${DIM}  2) npx skills add <owner/repo@skill>${RESET}`;
   const info = getOwnerRepoFromString(pkg);
   if (info && (await isRepoPublic(info.owner, info.repo))) {
     console.log(
-      `${DIM}View the skill at${RESET} ${TEXT}${selected.url || `https://skills.sh/${selected.slug}`}${RESET}`
+      `${DIM}View the skill at${RESET} ${TEXT}${selected.url || 'https://skilly.sh'}${RESET}`
     );
   } else {
-    console.log(`${DIM}Discover more skills at${RESET} ${TEXT}https://skills.sh${RESET}`);
+    console.log(`${DIM}Discover more skills at${RESET} ${TEXT}https://skilly.sh${RESET}`);
   }
 
   console.log();

@@ -1,13 +1,13 @@
 /**
  * Blob-based skill download utilities.
  *
- * Enables fast skill installation by fetching pre-built skill snapshots
- * from the skills.sh download API instead of cloning git repos.
+ * Enables fast skill installation by fetching skill snapshots from the
+ * Skilly API instead of cloning git repos.
  *
  * Flow:
  *   1. GitHub Trees API → discover SKILL.md locations
  *   2. raw.githubusercontent.com → fetch frontmatter to get skill names
- *   3. skills.sh/api/download → fetch full file contents from cached blob
+ *   3. Skilly API → fetch the complete SKILL.md from the directory
  */
 
 import { createHash } from 'node:crypto';
@@ -45,15 +45,7 @@ export interface BlobSkill extends Skill {
 
 // ─── Constants ───
 
-const DOWNLOAD_BASE_URL = process.env.SKILLS_DOWNLOAD_URL || 'https://skills.sh';
-
-// Repos that self-host their downloads on the blob fast-path
-export const BLOB_ALLOWED_REPOS: Record<string, { downloadUrl: (slug: string) => string }> = {
-  'zapier/connectors': {
-    downloadUrl: (slug) =>
-      `https://connectors-skills.zapier.com/download/${encodeURIComponent(slug)}/snapshot.json`,
-  },
-};
+const SKILLY_API_BASE_URL = (process.env.SKILLY_API_URL || 'https://skilly.sh').replace(/\/+$/, '');
 
 /** Timeout for individual HTTP fetches (ms) */
 const FETCH_TIMEOUT = 10_000;
@@ -119,7 +111,7 @@ async function fetchTreeBranch(
     const url = `${apiBase}/repos/${ownerRepo}/git/trees/${encodeURIComponent(branch)}?recursive=1`;
     const headers: Record<string, string> = {
       Accept: 'application/vnd.github.v3+json',
-      'User-Agent': 'skills-cli',
+      'User-Agent': 'skillycli',
     };
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -457,7 +449,7 @@ async function fetchSkillMdContent(
 }
 
 /**
- * Fetch a skill's full file contents from the skills.sh download API.
+ * Fetch a skill's complete SKILL.md from the Skilly API.
  * Returns the files array and content hash, or null on failure.
  */
 async function fetchSkillDownload(
@@ -465,12 +457,13 @@ async function fetchSkillDownload(
   slug: string
 ): Promise<SkillDownloadResponse | null> {
   try {
-    const [owner, repo] = source.split('/');
-    const defaultUrl = `${DOWNLOAD_BASE_URL}/api/download/${encodeURIComponent(owner!)}/${encodeURIComponent(repo!)}/${encodeURIComponent(slug)}`;
-    // Self-hosted repos build their own URL; otherwise fall back to the default.
-    const selfHosted = BLOB_ALLOWED_REPOS[source.toLowerCase()]?.downloadUrl(slug);
-    const url = selfHosted ?? defaultUrl;
+    const path = [...source.split('/'), slug].map(encodeURIComponent).join('/');
+    const url = `${SKILLY_API_BASE_URL}/api/v1/skills/${path}`;
+    const headers: Record<string, string> = { Accept: 'application/json' };
+    const token = process.env.SKILLY_API_TOKEN;
+    if (token) headers.Authorization = `Bearer ${token}`;
     const response = await fetch(url, {
+      headers,
       signal: AbortSignal.timeout(FETCH_TIMEOUT),
     });
     if (!response.ok) return null;
@@ -541,7 +534,7 @@ function hasCompleteNestedSnapshot(
  *   1. Fetch repo tree from GitHub Trees API
  *   2. Discover SKILL.md paths from the tree
  *   3. Fetch SKILL.md content from raw.githubusercontent.com (for frontmatter/name)
- *   4. Compute slugs and fetch full snapshots from skills.sh download API
+ *   4. Compute slugs and fetch the matching files from the Skilly API
  *
  * Returns the resolved BlobSkills + tree data on success, or null on any failure
  * (the caller should fall back to git clone).
@@ -647,7 +640,7 @@ export async function tryBlobInstall(
     if (filteredSkills.length === 0) return null;
   }
 
-  // 5. Fetch full snapshots from skills.sh download API in parallel
+  // 5. Fetch complete SKILL.md files from the Skilly API in parallel
   const source = ownerRepo.toLowerCase();
   const downloads = await Promise.all(
     filteredSkills.map(async (skill) => {

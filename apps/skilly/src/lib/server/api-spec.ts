@@ -38,7 +38,7 @@ export const apiEndpoints: ApiEndpoint[] = [
     { name: 'limit', in: 'query', type: 'integer', description: 'Maximum results, from 1 to 200.', example: 5 },
     { name: 'owner', in: 'query', type: 'string', description: 'Restrict results to a GitHub owner.', example: 'anthropics' },
   ], response: 'SearchResponse', example: 'curl "https://skilly.sh/api/v1/skills/search?name=algorithmic&category=Development&limit=5"', notes: ['Provide q or at least one field-specific search parameter. No bearer token is required for search.'] },
-  { method: 'GET', path: '/api/v1/skills/curated', title: 'Curated skills', summary: 'Get the official curated skill groups.', description: 'Returns first-party skill groups in the same envelope as skills.sh.', auth: true, parameters: [], response: 'CuratedResponse', example: 'curl -H "Authorization: Bearer $VERCEL_OIDC_TOKEN" "https://skilly.sh/api/v1/skills/curated"' },
+  { method: 'GET', path: '/api/v1/skills/curated', title: 'Curated skills', summary: 'Get the official curated skill groups.', description: 'Returns first-party skill groups from the Skilly directory.', auth: true, parameters: [], response: 'CuratedResponse', example: 'curl "https://skilly.sh/api/v1/skills/curated"' },
   { method: 'GET', path: '/api/v1/skills/{source}/{skill}', title: 'Skill detail', summary: 'Fetch metadata and the complete SKILL.md file.', description: 'Use the id from a list or search response. For GitHub sources, source is the owner/repository path and skill is the skill slug.', auth: true, parameters: [
     { name: 'source', in: 'path', required: true, type: 'string', description: 'The source repository, such as anthropics/skills.', example: 'anthropics/skills' },
     { name: 'skill', in: 'path', required: true, type: 'string', description: 'The URL-safe skill slug.', example: 'algorithmic-art' },
@@ -61,7 +61,7 @@ export function openApiDocument() {
     responses: { '200': { description: 'Successful response.', content: { 'application/json': { schema: { $ref: `#/components/schemas/${endpoint.response}` } } } }, '400': { description: 'Invalid request parameters.', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }, '404': { description: 'Skill or audit not found.', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } } },
   } }]))
   return {
-    openapi: '3.0.3', info: { title: 'Skilly API', version: '1.0.0', description: 'Programmatic access to the Skilly agent-skill catalog. The endpoint contract mirrors the skills.sh API.' }, servers: [{ url: apiBaseUrl }], security: [{ bearerAuth: [] }], paths,
+    openapi: '3.0.3', info: { title: 'Skilly API', version: '1.0.0', description: 'Programmatic access to the Skilly agent-skill catalog.' }, servers: [{ url: apiBaseUrl }], security: [{ bearerAuth: [] }], paths,
     components: { securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'Vercel OIDC' } }, schemas: {
       Skill: { type: 'object', required: ['id', 'slug', 'name', 'description', 'category', 'source', 'installs', 'sourceType', 'installUrl', 'url'], properties: skillProperties },
       Pagination: { type: 'object', properties: { page: { type: 'integer' }, perPage: { type: 'integer' }, total: { type: 'integer' }, hasMore: { type: 'boolean' } } },

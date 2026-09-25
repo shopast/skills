@@ -1,11 +1,10 @@
 {
-  "name": "skills",
+  "name": "skillycli",
   "version": "1.7.0",
-  "description": "The open agent skills ecosystem",
+  "description": "The Skilly command-line client for discovering and installing agent skills",
   "type": "module",
   "bin": {
-    "skills": "./bin/cli.mjs",
-    "add-skill": "./bin/cli.mjs"
+    "skillycli": "./bin/cli.mjs"
   },
   "files": [
     "dist",
@@ -122,11 +121,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shopast/skilly-cli.git"
+    "url": "git+https://github.com/shopast/skillycli.git"
   },
-  "homepage": "https://github.com/shopast/skilly-cli#readme",
+  "homepage": "https://skilly.sh",
   "bugs": {
-    "url": "https://github.com/shopast/skilly-cli/issues"
+    "url": "https://github.com/shopast/skillycli/issues"
   },
   "author": "",
   "license": "MIT",

@@ -1009,6 +1009,18 @@ describe('parseAddOptions', () => {
     expect(result.options.skill).toEqual(['*']);
   });
 
+  it('should parse repeated --skill flags for one source', () => {
+    const result = parseAddOptions([
+      'https://github.com/vercel-labs/skills',
+      '--skill',
+      'find-skills',
+      '--skill',
+      'web-design-guidelines',
+    ]);
+    expect(result.source).toEqual(['https://github.com/vercel-labs/skills']);
+    expect(result.options.skill).toEqual(['find-skills', 'web-design-guidelines']);
+  });
+
   it('should parse --agent with wildcard', () => {
     const result = parseAddOptions(['source', '--agent', '*']);
     expect(result.source).toEqual(['source']);

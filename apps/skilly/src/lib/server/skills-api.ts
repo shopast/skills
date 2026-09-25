@@ -17,7 +17,7 @@ export interface ApiSkill {
 
 export function apiSkill(skill: CatalogSkill): ApiSkill {
   const indexed = skill as IndexedSkill
-  const id = indexed.skillsShId ?? `${skill.repo}/${skill.name}`
+  const id = indexed.skillyId ?? `${skill.repo}/${skill.name}`
   return {
     id,
     slug: id.split('/').at(-1) ?? skill.name,
@@ -28,7 +28,7 @@ export function apiSkill(skill: CatalogSkill): ApiSkill {
     installs: indexed.installs ?? 0,
     sourceType: indexed.sourceType ?? 'github',
     installUrl: indexed.installUrl ?? `https://github.com/${skill.repo}`,
-    url: indexed.skillsShUrl ?? `https://skills.sh/${id}`,
+    url: indexed.skillyUrl ?? `https://skilly.sh/skills/${skill.id}`,
     ...(indexed.isDuplicate ? { isDuplicate: true } : {}),
   }
 }
@@ -38,8 +38,8 @@ export function findSkill(catalog: Catalog, id: string): CatalogSkill | undefine
   return catalog.skills.find((skill) => {
     const indexed = skill as IndexedSkill
     return (
-      indexed.skillsShId === normalized ||
-      indexed.skillsShUrl?.replace('https://skills.sh/', '') === normalized ||
+      indexed.skillyId === normalized ||
+      indexed.skillyUrl?.replace('https://skilly.sh/skills/', '') === normalized ||
       `${skill.repo}/${skill.name}` === normalized
     )
   })
@@ -59,7 +59,7 @@ export function requireAuthentication(request: Request) {
   return apiError(
     401,
     'authentication_required',
-    'This endpoint requires authentication. Pass a Vercel OIDC token (Authorization: Bearer <VERCEL_OIDC_TOKEN>) — see https://skills.sh/docs/api#authentication.'
+    'This endpoint requires authentication. Pass a bearer token in the Authorization header.'
   )
 }
 

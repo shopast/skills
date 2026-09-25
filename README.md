@@ -1,27 +1,38 @@
-# skilly-cli
+# skillycli
 
-The CLI for the open agent skills ecosystem.
+The CLI for the Skilly agent-skill catalog.
 
-This is the public Shopast fork of [`vercel-labs/skills`](https://github.com/vercel-labs/skills),
-with the standalone Skilly description-search directory and CLI integration
-maintained in this repository.
+This is the `skillycli` package and `skilly-cli` project. Its executable command is `skillycli`, with
+Skilly description search and catalog snapshot integration maintained in this
+repository.
+
+For one-shot use before a global install, run `npx --yes skillycli`. After a
+global install, the executable is simply `skillycli`.
 
 <!-- agent-list:start -->
 Supports **OpenCode**, **Claude Code**, **Codex**, **Cursor**, and [75 more](#supported-agents).
 <!-- agent-list:end -->
 
 <p>
-  <a href="https://vercel.com/labs#labs-products"><img alt="Vercel Labs Product" src="https://img.shields.io/badge/LABS-PRODUCT-0a0a0a.svg?style=for-the-badge&amp;logo=Vercel&amp;labelColor=000000" height="28"></a>
-  <a href="https://www.npmjs.com/package/skills"><img alt="npm version: skills" src="https://img.shields.io/npm/v/skills.svg?style=for-the-badge&amp;labelColor=000000" height="28"></a>
-  <a href="https://github.com/shopast/skilly-cli/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/github/license/shopast/skilly-cli.svg?style=for-the-badge&amp;labelColor=000000" height="28"></a>
-  <a href="https://www.npmjs.com/package/skills"><img alt="npm downloads per month: skills" src="https://img.shields.io/npm/dm/skills.svg?style=for-the-badge&amp;labelColor=000000&amp;label=npm%20downloads" height="28"></a>
-  <a href="https://skills.sh/vercel-labs/skills"><img alt="skills.sh" src="https://skills.sh/b/vercel-labs/skills?style=for-the-badge" height="28"></a>
+  <a href="https://www.npmjs.com/package/skillycli"><img alt="npm version: skillycli" src="https://img.shields.io/npm/v/skillycli.svg?style=for-the-badge&amp;labelColor=000000" height="28"></a>
+  <a href="https://github.com/shopast/skillycli/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/github/license/shopast/skillycli.svg?style=for-the-badge&amp;labelColor=000000" height="28"></a>
+  <a href="https://www.npmjs.com/package/skillycli"><img alt="npm downloads per month: skillycli" src="https://img.shields.io/npm/dm/skillycli.svg?style=for-the-badge&amp;label=npm%20downloads" height="28"></a>
+  <a href="https://skilly.sh"><img alt="Skilly directory" src="./assets/skilly-badge.svg" height="28"></a>
 </p>
 
 ## Install a Skill
 
 ```bash
-npx skills add vercel-labs/agent-skills
+npx --yes skillycli add shopast/find-skills --skill find-skills
+npx --yes skillycli add https://github.com/mattpocock/skills --skill grill-me
+```
+
+For several skills from one source, repeat `--skill`:
+
+```bash
+npx skillycli add https://github.com/vercel-labs/agent-skills \
+  --skill frontend-design \
+  --skill web-design-guidelines
 ```
 
 ## Use a Skill Without Installing
@@ -29,11 +40,11 @@ npx skills add vercel-labs/agent-skills
 Generate a prompt for one skill, or start a supported coding agent interactively:
 
 ```bash
-npx skills use vercel-labs/agent-skills@web-design-guidelines | claude
-npx skills use vercel-labs/agent-skills --skill web-design-guidelines --agent claude-code
+npx skillycli use vercel-labs/agent-skills@web-design-guidelines | claude
+npx skillycli use vercel-labs/agent-skills --skill web-design-guidelines --agent claude-code
 ```
 
-`skills use` resolves sources the same way as `skills add`, writes the selected skill files to a temporary directory, and prints only the generated prompt to stdout unless `--agent` is provided. With `--agent`, it starts one supported agent interactively with the generated prompt.
+`skillycli use` resolves sources the same way as `skillycli add`, writes the selected skill files to a temporary directory, and prints only the generated prompt to stdout unless `--agent` is provided. With `--agent`, it starts one supported agent interactively with the generated prompt.
 
 ## Shopast description search
 
@@ -46,41 +57,41 @@ pnpm install
 pnpm dev:skilly
 ```
 
-To make `skills find` consume a deployed Skilly instance, set its base URL:
+To make `skillycli find` consume a deployed Skilly instance, set its base URL:
 
 ```bash
-SKILLY_API_URL=https://your-skilly-worker.example npx skills find typography
+SKILLY_API_URL=https://your-skilly-worker.example npx skillycli find typography
 ```
 
-The CLI keeps the upstream `skills.sh` search contract by default. When
-`SKILLY_API_URL` is set, it reads Skilly’s `/api/v1/skills/search` response,
+The CLI searches Skilly by default. When `SKILLY_API_URL` is set,
+it reads that instance’s `/api/v1/skills/search` response,
 including descriptions and the matched field, while preserving the normal
-`npx skills add owner/repo --skill name` installation flow.
+`npx skillycli add owner/repo --skill name` installation flow.
 
 ### Source Formats
 
 ```bash
 # GitHub shorthand (owner/repo)
-npx skills add vercel-labs/agent-skills
+npx skillycli add vercel-labs/agent-skills
 
 # Full GitHub URL
-npx skills add https://github.com/vercel-labs/agent-skills
+npx skillycli add https://github.com/vercel-labs/agent-skills
 
 # Direct path to a skill in a repo
-npx skills add https://github.com/vercel-labs/agent-skills/tree/main/skills/web-design-guidelines
+npx skillycli add https://github.com/vercel-labs/agent-skills/tree/main/skills/web-design-guidelines
 
 # GitLab URL
-npx skills add https://gitlab.com/org/repo
+npx skillycli add https://gitlab.com/org/repo
 
 # Azure Repos (Azure DevOps Services or Server)
-npx skills add https://dev.azure.com/org/project/_git/repo
-npx skills add https://dev.azure.com/org/project/_git/repo?path=/skills/web-design&version=GBmain
+npx skillycli add https://dev.azure.com/org/project/_git/repo
+npx skillycli add https://dev.azure.com/org/project/_git/repo?path=/skills/web-design&version=GBmain
 
 # Any git URL
-npx skills add git@github.com:vercel-labs/agent-skills.git
+npx skillycli add git@github.com:vercel-labs/agent-skills.git
 
 # Local path
-npx skills add ./my-local-skills
+npx skillycli add ./my-local-skills
 ```
 
 ### Private Repositories
@@ -89,20 +100,20 @@ Use the same command for public and private repositories. The CLI uses the authe
 
 ```bash
 # GitHub shorthand or HTTPS (Git credential helper, GitHub CLI, then SSH fallback)
-npx skills add acme/private-skills
+npx skillycli add acme/private-skills
 
 # SSH on GitHub, GitLab, or another Git host
-npx skills add git@github.com:acme/private-skills.git
-npx skills add ssh://git@git.example.com/acme/private-skills.git
+npx skillycli add git@github.com:acme/private-skills.git
+npx skillycli add ssh://git@git.example.com/acme/private-skills.git
 
 # HTTPS on any Git host (uses your configured Git credential helper)
-npx skills add https://git.example.com/acme/private-skills.git
-npx skills add https://dev.azure.com/org/project/_git/private-skills
+npx skillycli add https://git.example.com/acme/private-skills.git
+npx skillycli add https://dev.azure.com/org/project/_git/private-skills
 ```
 
-For GitHub HTTPS and shorthand sources, `skills` first uses normal Git credentials. If that fails and GitHub CLI is authenticated, it tries `gh repo clone`, followed by SSH. It does not execute `gh auth token` or copy the stored GitHub CLI credential into the Node.js process.
+For GitHub HTTPS and shorthand sources, `skillycli` first uses normal Git credentials. If that fails and GitHub CLI is authenticated, it tries `gh repo clone`, followed by SSH. It does not execute `gh auth token` or copy the stored GitHub CLI credential into the Node.js process.
 
-For GitHub tree lookups, `skills` first tries the API anonymously, then an explicitly supplied environment token, then `gh api`. GitHub CLI applies its own stored authentication and returns only the API response; the credential is never printed to or read by `skills`. If API access still fails, update checks fall back to an authenticated Git clone.
+For GitHub tree lookups, `skillycli` first tries the API anonymously, then an explicitly supplied environment token, then `gh api`. GitHub CLI applies its own stored authentication and returns only the API response; the credential is never printed to or read by `skillycli`. If API access still fails, update checks fall back to an authenticated Git clone.
 
 `GITHUB_TOKEN` or `GH_TOKEN` can be set explicitly for GitHub API access, including private repository downloads and update checks. They are optional for installs when Git, GitHub CLI, or SSH authentication is already configured.
 
@@ -112,7 +123,7 @@ For GitHub tree lookups, `skills` first tries the API anonymously, then an expli
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `-g, --global`            | Install to user directory instead of project                                                                                                       |
 | `-a, --agent <agents...>` | <!-- agent-names:start -->Target specific agents (e.g., `claude-code`, `codex`). See [Supported Agents](#supported-agents)<!-- agent-names:end --> |
-| `-s, --skill <skills...>` | Install specific skills by name (use `'*'` for all skills)                                                                                         |
+| `-s, --skill <skills...>` | Install specific skills by name; repeat the flag for multiple skills (use `'*'` for all skills)                                                       |
 | `-l, --list`              | List available skills without installing                                                                                                           |
 | `--copy`                  | Copy files instead of symlinking to agent directories                                                                                              |
 | `-y, --yes`               | Skip all confirmation prompts                                                                                                                      |
@@ -122,31 +133,31 @@ For GitHub tree lookups, `skills` first tries the API anonymously, then an expli
 
 ```bash
 # List skills in a repository
-npx skills add vercel-labs/agent-skills --list
+npx skillycli add vercel-labs/agent-skills --list
 
 # Install specific skills
-npx skills add vercel-labs/agent-skills --skill frontend-design --skill skill-creator
+npx skillycli add vercel-labs/agent-skills --skill frontend-design --skill skill-creator
 
 # Install a skill with spaces in the name (must be quoted)
-npx skills add owner/repo --skill "Convex Best Practices"
+npx skillycli add owner/repo --skill "Convex Best Practices"
 
 # Install to specific agents
-npx skills add vercel-labs/agent-skills -a claude-code -a opencode
+npx skillycli add vercel-labs/agent-skills -a claude-code -a opencode
 
 # Non-interactive installation (CI/CD friendly)
-npx skills add vercel-labs/agent-skills --skill frontend-design -g -a claude-code -y
+npx skillycli add vercel-labs/agent-skills --skill frontend-design -g -a claude-code -y
 
 # Install all skills from a repo to all agents
-npx skills add vercel-labs/agent-skills --all
+npx skillycli add vercel-labs/agent-skills --all
 
 # Install all skills to specific agents
-npx skills add vercel-labs/agent-skills --skill '*' -a claude-code
+npx skillycli add vercel-labs/agent-skills --skill '*' -a claude-code
 
 # Install specific skills to all agents
-npx skills add vercel-labs/agent-skills --agent '*' --skill frontend-design
+npx skillycli add vercel-labs/agent-skills --agent '*' --skill frontend-design
 
 # Install from a direct SKILL.md or archive download URL
-npx skills add https://example.com/download/my-skill
+npx skillycli add https://example.com/download/my-skill
 ```
 
 Direct download URLs are tried after well-known discovery. They may point to a single valid `SKILL.md` file or a `.zip`, `.tar`, `.tar.gz`, or `.tgz` archive; the URL does not need to include a file extension. Downloads are limited to 10 MiB, extracted content to 25 MiB, and archives to 1000 files by default. Override with `SKILLS_DOWNLOAD_MAX_BYTES`, `SKILLS_EXTRACT_MAX_BYTES`, and `SKILLS_EXTRACT_MAX_FILES` when you trust the source.
@@ -171,61 +182,61 @@ When installing interactively, you can choose:
 
 | Command                      | Description                                   |
 | ---------------------------- | --------------------------------------------- |
-| `npx skills use <source>`    | Use one skill without installing              |
-| `npx skills list`            | List installed skills (alias: `ls`)           |
-| `npx skills find [query]`    | Search for skills interactively or by keyword |
-| `npx skills remove [skills]` | Remove installed skills from agents           |
-| `npx skills update [skills]` | Update installed skills to latest versions    |
-| `npx skills init [name]`     | Create a new SKILL.md template                |
+| `npx skillycli use <source>`    | Use one skill without installing              |
+| `npx skillycli list`            | List installed skills (alias: `ls`)           |
+| `npx skillycli find [query]`    | Search for skills interactively or by keyword |
+| `npx skillycli remove [skills]` | Remove installed skills from agents           |
+| `npx skillycli update [skills]` | Update installed skills to latest versions    |
+| `npx skillycli init [name]`     | Create a new SKILL.md template                |
 
-### `skills list`
+### `skillycli list`
 
 List all installed skills. Similar to `npm ls`.
 
 ```bash
 # List all installed skills (project and global)
-npx skills list
+npx skillycli list
 
 # List only global skills
-npx skills ls -g
+npx skillycli ls -g
 
 # Filter by specific agents
-npx skills ls -a claude-code -a cursor
+npx skillycli ls -a claude-code -a cursor
 ```
 
-### `skills find`
+### `skillycli find`
 
 Search for skills interactively or by keyword.
 
 ```bash
 # Interactive search (fzf-style)
-npx skills find
+npx skillycli find
 
 # Search by keyword
-npx skills find typescript
+npx skillycli find typescript
 
 # Search across every repository owned by an organization or user
-npx skills find react --owner vercel
+npx skillycli find react --owner vercel
 ```
 
-### `skills update`
+### `skillycli update`
 
 ```bash
 # Update all skills (interactive scope prompt)
-npx skills update
+npx skillycli update
 
 # Update a single skill by name
-npx skills update my-skill
+npx skillycli update my-skill
 
 # Update multiple specific skills
-npx skills update frontend-design web-design-guidelines
+npx skillycli update frontend-design web-design-guidelines
 
 # Update only global or project skills
-npx skills update -g
-npx skills update -p
+npx skillycli update -g
+npx skillycli update -p
 
 # Non-interactive (auto-detects scope: project if in a project, else global)
-npx skills update -y
+npx skillycli update -y
 ```
 
 | Option          | Description                                                               |
@@ -235,47 +246,47 @@ npx skills update -y
 | `-y, --yes`     | Skip scope prompt (auto-detect: project if in a project dir, else global) |
 | `[skills...]`   | Update specific skills by name instead of all                             |
 
-### `skills init`
+### `skillycli init`
 
 ```bash
 # Create SKILL.md in current directory
-npx skills init
+npx skillycli init
 
 # Create a new skill in a subdirectory
-npx skills init my-skill
+npx skillycli init my-skill
 ```
 
-### `skills remove`
+### `skillycli remove`
 
 Remove installed skills from agents.
 
 ```bash
 # Remove interactively (select from installed skills)
-npx skills remove
+npx skillycli remove
 
 # Remove specific skill by name
-npx skills remove web-design-guidelines
+npx skillycli remove web-design-guidelines
 
 # Remove multiple skills
-npx skills remove frontend-design web-design-guidelines
+npx skillycli remove frontend-design web-design-guidelines
 
 # Remove from global scope
-npx skills remove --global web-design-guidelines
+npx skillycli remove --global web-design-guidelines
 
 # Remove from specific agents only
-npx skills remove --agent claude-code cursor my-skill
+npx skillycli remove --agent claude-code cursor my-skill
 
 # Remove all installed skills without confirmation
-npx skills remove --all
+npx skillycli remove --all
 
 # Remove all skills from a specific agent
-npx skills remove --skill '*' -a cursor
+npx skillycli remove --skill '*' -a cursor
 
 # Remove a specific skill from all agents
-npx skills remove my-skill --agent '*'
+npx skillycli remove my-skill --agent '*'
 
 # Use 'rm' alias
-npx skills rm my-skill
+npx skillycli rm my-skill
 ```
 
 | Option         | Description                                      |
@@ -297,7 +308,7 @@ Skills let agents perform specialized tasks like:
 - Creating PRs following your team's conventions
 - Integrating with external tools (Linear, Notion, etc.)
 
-Discover skills at **[skills.sh](https://skills.sh)**
+Discover skills at **[Skilly](https://skilly.sh)**
 
 ## Supported Agents
 
@@ -570,19 +581,19 @@ Ensure you have write access to the target directory.
 
 ```bash
 # Install internal skills
-INSTALL_INTERNAL_SKILLS=1 npx skills add vercel-labs/agent-skills --list
+INSTALL_INTERNAL_SKILLS=1 npx skillycli add vercel-labs/agent-skills --list
 ```
 
 ## Telemetry
 
-This CLI collects anonymous usage data to help improve the tool. No personal information is collected.
+This CLI sends usage events to Skilly at `https://skilly.sh/api/cli/telemetry`. Events include the CLI version, command details, and public source and skill identifiers. If you pass `--metadata`, that caller-provided JSON is included in the install event.
 
-GitHub repository and skill identifiers are sent only for repositories that GitHub positively confirms are public. Other remote source types may include source and skill identifiers in install telemetry because their visibility cannot be checked through GitHub. Security-audit requests remain limited to confirmed-public GitHub repositories. Set `DISABLE_TELEMETRY=1` or `DO_NOT_TRACK=1` to disable both entirely.
+GitHub repository and skill identifiers are sent only for repositories that GitHub positively confirms are public. Other remote source types may include source and skill identifiers in install telemetry because their visibility cannot be checked through GitHub. Security-audit requests go to Skilly and remain limited to confirmed-public GitHub repositories. Set `DISABLE_TELEMETRY=1` or `DO_NOT_TRACK=1` to disable both entirely.
 
 ## Related Links
 
 - [Agent Skills Specification](https://agentskills.io)
-- [Skills Directory](https://skills.sh)
+- [Skills Directory](https://skilly.sh)
 - [Amp Skills Documentation](https://ampcode.com/manual#agent-skills)
 - [Antigravity Skills Documentation](https://antigravity.google/docs/skills)
 - [Factory AI / Droid Skills Documentation](https://docs.factory.ai/cli/configuration/skills)

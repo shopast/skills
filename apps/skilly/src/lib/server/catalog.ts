@@ -4,8 +4,8 @@ export type CatalogSkill = Omit<(typeof fallbackCatalog.skills)[number], 'conten
   content?: string
   rawSource?: string
   installs?: number
-  skillsShId?: string
-  skillsShUrl?: string
+  skillyId?: string
+  skillyUrl?: string
   apiName?: string
   sourceType?: 'github' | 'well-known'
   installUrl?: string

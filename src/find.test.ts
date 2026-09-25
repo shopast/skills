@@ -45,7 +45,7 @@ describe('searchSkillsAPI', () => {
     await searchSkillsAPI('react native', 'vercel');
 
     const url = new URL(fetchMock.mock.calls[0]![0] as string);
-    expect(url.pathname).toBe('/api/search');
+    expect(url.pathname).toBe('/api/v1/skills/search');
     expect(url.searchParams.get('q')).toBe('react native');
     expect(url.searchParams.get('owner')).toBe('vercel');
     expect(url.searchParams.get('limit')).toBe('20');

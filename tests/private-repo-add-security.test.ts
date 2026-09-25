@@ -140,7 +140,7 @@ describe('private repository installs', () => {
     });
 
     const requestedUrls = vi.mocked(globalThis.fetch).mock.calls.map(([input]) => String(input));
-    expect(requestedUrls.some((url) => url.startsWith('https://add-skill.vercel.sh/'))).toBe(false);
+    expect(requestedUrls.some((url) => url.startsWith('https://skilly.sh/api/cli/'))).toBe(false);
   });
 
   it('does not send identifiers for repositories whose visibility is unknown', async () => {
@@ -154,7 +154,7 @@ describe('private repository installs', () => {
     });
 
     const requestedUrls = vi.mocked(globalThis.fetch).mock.calls.map(([input]) => String(input));
-    expect(requestedUrls.some((url) => url.startsWith('https://add-skill.vercel.sh/'))).toBe(false);
+    expect(requestedUrls.some((url) => url.startsWith('https://skilly.sh/api/cli/'))).toBe(false);
   });
 
   it('installs from another Git host and preserves opted-in non-GitHub telemetry', async () => {
@@ -174,10 +174,8 @@ describe('private repository installs', () => {
     ).resolves.toContain('private-skill');
 
     const requestedUrls = vi.mocked(globalThis.fetch).mock.calls.map(([input]) => String(input));
-    expect(requestedUrls.some((url) => url.startsWith('https://add-skill.vercel.sh/t?'))).toBe(
-      true
-    );
-    expect(requestedUrls.some((url) => url.startsWith('https://add-skill.vercel.sh/audit?'))).toBe(
+    expect(requestedUrls).toContain('https://skilly.sh/api/cli/telemetry');
+    expect(requestedUrls.some((url) => url.startsWith('https://skilly.sh/api/cli/audit?'))).toBe(
       false
     );
   });

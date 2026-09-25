@@ -351,7 +351,7 @@ export async function installSkillForAgent(
   try {
     // Never install onto (or inside) the source directory. This can happen with
     // agent-specific project directories like OpenClaw's "skills" when users run
-    // `skills add ./skills --all`: the source `./skills/<name>` and destination
+    // `skillycli add ./skills --all`: the source `./skills/<name>` and destination
     // `./skills/<name>` are the same path. Cleaning the destination would delete
     // the user's source skill before we can link or copy it.
     if (pathsOverlap(skill.path, agentDir)) {
@@ -934,7 +934,7 @@ export async function installWellKnownSkillForAgent(
 }
 
 /**
- * Install a blob-downloaded skill (fetched from skills.sh download API).
+ * Install a blob-downloaded skill (fetched from the Skilly API).
  * Similar to installWellKnownSkillForAgent but takes the snapshot file format
  * (array of { path, contents }) instead of a Map.
  */

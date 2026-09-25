@@ -35,7 +35,7 @@ function refineAgentResult(result: AgentResult): AgentResult {
 }
 
 /**
- * Map from @vercel/detect-agent names to skills-cli AgentType identifiers.
+ * Map from @vercel/detect-agent names to Skilly AgentType identifiers.
  * Only includes agents that exist in both systems.
  */
 const agentNameToType: Record<string, AgentType> = {
@@ -43,7 +43,7 @@ const agentNameToType: Record<string, AgentType> = {
   'cursor-cli': 'cursor',
   claude: 'claude-code',
   cowork: 'claude-code',
-  devin: 'universal', // Devin not in skills-cli agent list, use universal
+  devin: 'universal', // Devin is not in the supported agent list, use universal
   replit: 'replit',
   gemini: 'gemini-cli',
   codex: 'codex',
@@ -84,8 +84,8 @@ export async function getAgentName(): Promise<string | null> {
 }
 
 /**
- * Maps a detected agent name to the corresponding skills-cli AgentType.
- * Returns null if the agent can't be mapped to a specific skills-cli agent.
+ * Maps a detected agent name to the corresponding Skilly AgentType.
+ * Returns null if the agent can't be mapped to a specific Skilly agent.
  */
 export function getAgentType(agentName: string): AgentType | null {
   return agentNameToType[agentName] ?? null;

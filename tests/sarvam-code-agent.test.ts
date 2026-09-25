@@ -42,7 +42,7 @@ describe('Sarvam Code agent support', () => {
     await expect(agents['sarvam-code'].detectInstalled()).resolves.toBe(false);
   });
 
-  it('accepts sarvam-code as a valid --agent for skills use', async () => {
+  it('accepts sarvam-code as a valid --agent for skilly-cli use', async () => {
     const { parseUseOptions } = await import('../src/use.ts');
 
     const result = parseUseOptions(['vercel-labs/agent-skills', '--agent', 'sarvam-code']);

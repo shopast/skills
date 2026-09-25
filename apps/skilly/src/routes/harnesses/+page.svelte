@@ -74,7 +74,7 @@
     </div>
     <ol>
       <li><span>01</span><p><a href="/">Browse Skilly</a>, open a skill, and read its original instructions and source.</p></li>
-      <li><span>02</span><p>Copy the install command, then run it from this harness’s project terminal: <code>npx skills add owner/repo --skill name</code>.</p></li>
+      <li><span>02</span><p>Copy the install command, then run it from this harness’s project terminal: <code>npx skillycli add owner/repo --skill name</code>.</p></li>
       <li><span>03</span><p>Select your harness in the installer when it is offered, then reopen the project or start a fresh agent task so it reads the new skill.</p></li>
     </ol>
   </section>

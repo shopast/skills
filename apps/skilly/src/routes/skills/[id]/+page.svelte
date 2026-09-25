@@ -5,7 +5,7 @@
   let { data }: { data: PageData } = $props();
   let copyState = $state('');
   $effect(() => { data.skill.id; copyState = ''; });
-  let command = $derived(`npx skills add ${data.skill.repo} --skill ${data.skill.name}`);
+  let command = $derived(`npx skillycli add ${data.skill.repo} --skill ${data.skill.name}`);
   async function copy() { try { await navigator.clipboard.writeText(command); copyState = 'Copied'; } catch { copyState = 'Select and copy the command below.'; } }
 </script>
 <svelte:head><title>{data.skill.name} — Skilly</title><meta name="description" content={data.skill.description}/></svelte:head>

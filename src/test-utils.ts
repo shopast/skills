@@ -83,7 +83,7 @@ function createIsolatedTestEnvironment(overrides?: Record<string, string>): {
   env: NodeJS.ProcessEnv;
   temporaryHome: string;
 } {
-  const temporaryHome = mkdtempSync(join(tmpdir(), 'skills-cli-test-home-'));
+  const temporaryHome = mkdtempSync(join(tmpdir(), 'skillycli-test-home-'));
   const home = overrides?.HOME || overrides?.USERPROFILE || temporaryHome;
 
   return {

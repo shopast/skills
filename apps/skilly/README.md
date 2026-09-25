@@ -30,8 +30,8 @@ public so agents can use it without a bearer token; listing, curated, and
 detail endpoints retain the upstream authentication contract.
 
 The checked-in catalog is a safe fallback. To refresh it from the complete
-skills.sh catalog, provide `SKILLS_SH_API_TOKEN` or `VERCEL_OIDC_TOKEN` and
-run:
+Skilly catalog, provide `SKILLY_API_TOKEN` and optionally `SKILLY_API_URL`,
+then run:
 
 ```bash
 pnpm --filter skilly catalog:refresh
@@ -49,8 +49,7 @@ deploy`. Create the R2 bucket declared in `wrangler.jsonc` and set the
 `CATALOG_INGEST_SECRET` secret before enabling the catalog sync function.
 
 The sync function in `api/skilly-catalog-sync.ts` is a separate, private
-Vercel Cron entry point because the upstream catalog API uses short-lived
-Vercel OIDC tokens. Its setup is documented in
+Vercel Cron entry point for refreshing the Skilly catalog. Its setup is documented in
 [`docs/SKILLY_CATALOG_SYNC.md`](../../docs/SKILLY_CATALOG_SYNC.md).
 
 The repository links on skill pages identify the original publisher. Their

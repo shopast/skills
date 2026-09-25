@@ -1,5 +1,5 @@
-const TELEMETRY_URL = 'https://add-skill.vercel.sh/t';
-const AUDIT_URL = 'https://add-skill.vercel.sh/audit';
+const TELEMETRY_URL = 'https://skilly.sh/api/cli/telemetry';
+const AUDIT_URL = 'https://skilly.sh/api/cli/audit';
 
 interface InstallTelemetryData {
   event: 'install';
@@ -8,7 +8,7 @@ interface InstallTelemetryData {
   agents: string;
   global?: '1';
   skillFiles?: string; // JSON stringified { skillName: relativePath }
-  /** User-facing URL that can be passed back to `skills add`. */
+  /** User-facing URL that can be passed back to `skillycli add`. */
   installUrl?: string;
   /** Caller-provided JSON attached to this install telemetry event. */
   metadata?: string;
@@ -100,7 +100,7 @@ export interface PartnerAudit {
   analyzedAt: string;
 }
 
-export type SkillAuditData = Record<string, PartnerAudit>;
+export type SkillAuditData = { skilly?: PartnerAudit };
 export type AuditResponse = Record<string, SkillAuditData>;
 
 /**
@@ -170,7 +170,11 @@ export function track(data: TelemetryData): void {
 
     // Fire and forget during the workflow, but track the promise so
     // flushTelemetry() can await it before the process exits.
-    const p = fetch(`${TELEMETRY_URL}?${params.toString()}`)
+    const p = fetch(TELEMETRY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.fromEntries(params)),
+    })
       .catch(() => {})
       .then(() => {});
     pendingTelemetry.push(p);

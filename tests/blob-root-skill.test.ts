@@ -74,6 +74,7 @@ describe('tryBlobInstall', () => {
     const result = await tryBlobInstall('vercel/eve');
 
     expect(result).not.toBeNull();
+    expect(fetchMock.mock.calls[2]![0]).toBe('https://skilly.sh/api/v1/skills/vercel/eve/eve');
     expect(result!.skills).toHaveLength(1);
     expect(result!.skills[0]!.files).toEqual([{ path: 'SKILL.md', contents: ROOT_SKILL_MD }]);
     expect(result!.skills[0]!.snapshotHash).not.toBe('full-repo-hash');

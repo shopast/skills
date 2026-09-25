@@ -18,14 +18,14 @@ async function body(response: Response) {
 
 const bearer = 'Bearer test-oidc-token'
 
-describe('skills.sh API compatibility', () => {
+describe('Skilly API', () => {
   it('uses the documented authentication error contract', async () => {
     const response = await list(event('/api/v1/skills'))
     expect(response.status).toBe(401)
     expect(await body(response)).toEqual({
       error: 'authentication_required',
       message:
-        'This endpoint requires authentication. Pass a Vercel OIDC token (Authorization: Bearer <VERCEL_OIDC_TOKEN>) — see https://skills.sh/docs/api#authentication.',
+        'This endpoint requires authentication. Pass a bearer token in the Authorization header.',
     })
   })
 
@@ -42,7 +42,7 @@ describe('skills.sh API compatibility', () => {
       installs: 0,
       sourceType: 'github',
       installUrl: expect.stringMatching(/^https:\/\/github\.com\//),
-      url: expect.stringMatching(/^https:\/\/skills\.sh\//),
+      url: expect.stringMatching(/^https:\/\/skilly\.sh\//),
       installsYesterday: 0,
       change: 0,
     })
