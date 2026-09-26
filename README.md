@@ -14,10 +14,10 @@ Supports **OpenCode**, **Claude Code**, **Codex**, **Cursor**, and [75 more](#su
 <!-- agent-list:end -->
 
 <p>
+  <a href="https://skilly.sh"><img alt="Skilly directory" src="./assets/skilly-badge.svg" height="28"></a>
   <a href="https://www.npmjs.com/package/skillycli"><img alt="npm version: skillycli" src="https://img.shields.io/npm/v/skillycli.svg?style=for-the-badge&amp;labelColor=000000" height="28"></a>
   <a href="https://github.com/shopast/skillycli/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/github/license/shopast/skillycli.svg?style=for-the-badge&amp;labelColor=000000" height="28"></a>
   <a href="https://www.npmjs.com/package/skillycli"><img alt="npm downloads per month: skillycli" src="https://img.shields.io/npm/dm/skillycli.svg?style=for-the-badge&amp;label=npm%20downloads" height="28"></a>
-  <a href="https://skilly.sh"><img alt="Skilly directory" src="./assets/skilly-badge.svg" height="28"></a>
 </p>
 
 ## Install a Skill
